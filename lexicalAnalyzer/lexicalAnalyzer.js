@@ -75,6 +75,8 @@ const lexicalAnalyzer = async () => {
         else return analyze(i + 1);
 
       } else if (isLetter(code[i])) {
+
+        /// aqui
         const { token, end } = letterAutomaton(code, i, reservedWords, ids);
         addtoken(token);
         analyze(end + 1);

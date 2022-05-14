@@ -51,10 +51,10 @@ module.exports.letterAutomaton = (code, position, reservedWords, ids) => {
     });
 
     if (!findWordOnIds) {
-      ids.push({ id: word, line: ids.length + 1 });
+      ids.push({ id: word, index: ids.length + 1 });
       return { token: `<id,${ids.length}>`, end };
     } else {
-      return { token: `<id,${findWordOnIds.line}>`, end };
+      return { token: `<id,${findWordOnIds.index}>`, end };
     }
   }
 };

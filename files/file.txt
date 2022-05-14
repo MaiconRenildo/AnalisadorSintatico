@@ -1,6 +1,12 @@
 program correto;
 int a, b;
+var jj;
+float k;
+var ll := "sd";
+sak l;
 begin
+  k:=5.4;
+
   a:=-2;
   b:=10;
 // comentário com barras
@@ -17,3 +23,8 @@ begin
 
 end
 end.
+
+int:=
+
+id := 10
+id1 + id2
