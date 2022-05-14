@@ -1,0 +1,24 @@
+{
+  "name": "analisadorsintatico",
+  "version": "1.0.0",
+  "description": "AnalisadorSintatico",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaiconRenildo/AnalisadorSintatico.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MaiconRenildo/AnalisadorSintatico/issues"
+  },
+  "homepage": "https://github.com/MaiconRenildo/AnalisadorSintatico#readme",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "fs": "^0.0.1-security"
+  }
+}

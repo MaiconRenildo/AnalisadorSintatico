@@ -1,0 +1,19 @@
+program correto;
+int a, b;
+begin
+  a:=-2;
+  b:=10;
+// comentário com barras
+  c:=a+b;
+  d:=b/c;
+
+{
+  comentário com chaves
+}
+  begin
+    if (a<1) then
+    b:=1
+    c:=b+1
+
+end
+end.
