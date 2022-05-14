@@ -12,7 +12,7 @@ const {
   isEndOfNumber,
   isPunctuation,
   isParentheses,
-} = require("../../../util/util");
+} = require("../../../../lexicalAnalyzer/util/util");
 
 describe("util\n", () => {
   describe("isDigit", () => {

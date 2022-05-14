@@ -1,4 +1,4 @@
-const { numberAutomaton } = require("../../../automatons/number");
+const { numberAutomaton } = require("../../../../lexicalAnalyzer/automatons/number");
 
 describe("Number Automaton", () => {
   describe("Inteiros", () => {

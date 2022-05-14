@@ -1,4 +1,4 @@
-const { operatorAutomaton } = require("../../../automatons/operator");
+const { operatorAutomaton } = require("../../../../lexicalAnalyzer/automatons/operator");
 
 describe("Operator Automaton", () => {
   it("Deve receber '+1' e retornar o token e a posição final ", () => {

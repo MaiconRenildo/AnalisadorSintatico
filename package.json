@@ -4,7 +4,8 @@
   "description": "AnalisadorSintatico",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx jest",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,9 @@
     "url": "https://github.com/MaiconRenildo/AnalisadorSintatico/issues"
   },
   "homepage": "https://github.com/MaiconRenildo/AnalisadorSintatico#readme",
+  "devDependencies": {
+    "jest": "^28.1.0"
+  },
   "dependencies": {
     "dotenv": "^16.0.1",
     "fs": "^0.0.1-security"

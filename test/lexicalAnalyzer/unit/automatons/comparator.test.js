@@ -1,4 +1,4 @@
-const { comparatorAutomaton } = require("../../../automatons/comparator");
+const { comparatorAutomaton } = require("../../../../lexicalAnalyzer/automatons/comparator");
 
 describe("Automato comparador", () => {
   it("Deve receber '< ' e retornar o token e a posição final", () => {

@@ -1,5 +1,5 @@
 require("dotenv").config();
-const { fileReader } = require("./fileReader");
+const {fileReader} = require("../fileReader")
 const path = `./files/${process.env.FILE_NAME}`;
 const {
   isDigit,
@@ -21,7 +21,8 @@ const { operatorAutomaton } = require("./automatons/operator");
 const { comparatorAutomaton } = require("./automatons/comparator");
 
 const lexicalAnalyzer = async () => {
-  const code = await fileReader("./files/file.txt");
+  const code = await fileReader(path);
+
   const ids = [];
   const reservedWords = ["program","var","int","float","begin","do","while","then","if","else","end","read","write","not","div","and","procedure","true","false"];
   const tokens = [];
@@ -31,13 +32,6 @@ const lexicalAnalyzer = async () => {
       tokens.push(token);
     }
   };
-
-  const print = () => {
-    console.log("\nids: \n");
-    console.table(ids);
-    console.log("tokens:");
-    console.table(tokens);
-  }
 
   const analyze = (i) => {
 
@@ -100,19 +94,12 @@ const lexicalAnalyzer = async () => {
   };
 
   analyze(0);
-  print();
-
+  
   return {
     tokens,
     ids
   };
+
 };
 
-lexicalAnalyzer()
-
-// module.exports.main = async () =>{
-
-//   return lexicalAnalyzer()
-// }
-
-// // module.exports = main
+module.exports = lexicalAnalyzer

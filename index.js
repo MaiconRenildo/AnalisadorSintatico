@@ -1,8 +1,10 @@
-const a = require("./AnalisadorLexico/a")
+const lexicalAnalyzer = require("./lexicalAnalyzer/lexicalAnalyzer")
 
 
-const main = async () =>{
-    resposta = await a.main()
+const Parser = async() =>{
+
+  const { tokens,ids } = await lexicalAnalyzer()
+  console.log(tokens,ids)
 }
 
-main()
+Parser()

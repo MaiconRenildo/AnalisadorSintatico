@@ -1,4 +1,4 @@
-const { keyAutomaton } = require("../../../automatons/key");
+const { keyAutomaton } = require("../../../../lexicalAnalyzer/automatons/key");
 
 describe("Key Automaton", () => {
 

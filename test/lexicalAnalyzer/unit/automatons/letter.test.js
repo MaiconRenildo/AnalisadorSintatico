@@ -1,4 +1,4 @@
-const { letterAutomaton } = require("../../../automatons/letter");
+const { letterAutomaton } = require("../../../../lexicalAnalyzer/automatons/letter");
 
 describe("Automato palavra reservada ou id", () => {
   const reservedWords = [

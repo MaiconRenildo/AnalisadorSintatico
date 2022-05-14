@@ -1,4 +1,4 @@
-const { stringAutomaton } = require("../../../automatons/string");
+const { stringAutomaton } = require("../../../../lexicalAnalyzer/automatons/string");
 
 describe("String Automaton", () => {
   it('Deve receber "" e retornar o token e a posição final', () => {
