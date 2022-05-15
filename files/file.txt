@@ -23,8 +23,3 @@ begin
 
 end
 end.
-
-int:=
-
-id := 10
-id1 + id2

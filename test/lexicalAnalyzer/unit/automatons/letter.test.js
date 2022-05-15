@@ -1,4 +1,6 @@
-const { letterAutomaton } = require("../../../../lexicalAnalyzer/automatons/letter");
+const {
+  letterAutomaton,
+} = require("../../../../lexicalAnalyzer/automatons/letter");
 
 describe("Automato palavra reservada ou id", () => {
   const reservedWords = [
@@ -29,18 +31,18 @@ describe("Automato palavra reservada ou id", () => {
     expect(res).toHaveProperty("end");
     expect(res).toHaveProperty("token");
     expect(res.token).toEqual("<id,1>");
-    expect(ids[0]).toHaveProperty("line");
+    expect(ids[0]).toHaveProperty("index");
     expect(ids[0]).toHaveProperty("id");
     expect(ids[0].id).toEqual("Program");
   });
 
   it("Deve receber 'any' e retornar o token e a posição final", () => {
-    const ids = [{ id: "any", line: 1 }];
+    const ids = [{ id: "any", index: 1 }];
     const res = letterAutomaton("any", 0, reservedWords, ids);
     expect(res).toHaveProperty("end");
     expect(res).toHaveProperty("token");
     expect(res.token).toEqual("<id,1>");
-    expect(ids[0]).toHaveProperty("line");
+    expect(ids[0]).toHaveProperty("index");
     expect(ids[0]).toHaveProperty("id");
     expect(ids[0].id).toEqual("any");
   });
