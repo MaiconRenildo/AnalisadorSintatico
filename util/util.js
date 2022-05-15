@@ -16,10 +16,11 @@ const deleteUnexpectedTokens = (tokens, index, sinc) => {
 };
 
 
+
 //////////////////////// PROCESSO DE LEITURA DO INT OU FLOAT ////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-const afterId = (tokens, index) => {
+const afterIdafterIntOrFloat = (tokens, index) => {
   if (!tokens || index >= tokens.length)
     return throwsAnError("Fim inesperado após a leitura de um id");
 
@@ -31,7 +32,7 @@ const afterId = (tokens, index) => {
   throwsAnError("Após um id deve haver um desses elementos -> (';',':=',','");
   tokens = deleteUnexpectedTokens(tokens, index, [";", ",", ":="]); // index+1 -> ; := ou ,
 
-  return afterId(tokens, index);
+  return afterIdafterIntOrFloat(tokens, index);
 };
 
 const afterIntOrFloat = (tokens, index) => {
@@ -43,11 +44,12 @@ const afterIntOrFloat = (tokens, index) => {
     tokens = deleteUnexpectedTokens(tokens, index, ["id"]); // index -> id
   }
 
-  return afterId(tokens, index + 1);
+  return afterIdafterIntOrFloat(tokens, index + 1);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 ///////////////////////////// PROCESSO DE LEITURA DO PROGRAM ////////////////////////////////
@@ -85,6 +87,7 @@ const readProgram = (tokens) => {
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
+
 
 
 //////////////////////////// PROCESSO DE LEITURA DO VAR  ////////////////////////////////////
@@ -154,246 +157,320 @@ const readEnd = (tokens,index) => {
 
   foundOn = tokens.indexOf("<begin,>")
   
-  if(foundOn==-1){
+  if(foundOn==-1) return throwsAnError("Um end inesperado foi recebido")
 
-    if (index+1 >= tokens.length) return throwsAnError("Faltou um '.' no fechamento do código");
-
-    const secondToken = getToken(tokens[index+1])
-    if(secondToken=="."){
-      return true
-    }else{
-      return throwsAnError("Um end inesperado foi recebido")
-    }
-  }
 
   tokens.splice(foundOn,1)
-  nextToken(tokens,index)
+
+
+  if (index >= tokens.length) return throwsAnError("Faltou um '.' no fechamento do código");
+
+  const secondToken = getToken(tokens[index])
+
+  if(secondToken==".") return true
+
+  return nextToken(tokens,index)
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-module.exports = {
-  deleteUnexpectedTokens,
-  afterIntOrFloat,
-  throwsAnError,
-  getToken,
-  readProgram,
-  afterVar,
-  readEnd
+
+
+/////////////////////////////// PROCESSO DE LEITURA DO BEGIN ////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+const readBegin = (tokens,index) => {
+
+  const secondToken = getToken(tokens[index+1])
+
+  if(secondToken=="if") return readIf(tokens,index+1)
+  if(secondToken=="while") return readWhile(tokens,index+1)
+  if(secondToken=="begin") return readBegin(tokens,index+1)
+ 
+  if(secondToken=="var") return afterVar(tokens,index+2)
+  if(secondToken=="float"||secondToken=="int"){
+
+
+    return afterIntOrFloat(tokens,index+2)
+  } 
+  if(secondToken=="id") return afterId(tokens,index+2)
+  
+  throwsAnError("Após um begin é necessário um desses identificadores -> (if,while,begin,var,float,int)");
+  tokens = deleteUnexpectedTokens(tokens, index+1, ["if","while","begin","var","float","int"]);
+
+  return readBegin(tokens,index)
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+//SERVE APENAS PARA EXPRESSÕES SIMPLES - REFATORAR
+//////////////////////////// PROCESSO DE VALIDAÇÃO DE EXPRESSÃO /////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+const validateExpression = (tokens,index)=> {
+
+  const rOperation = (i) => {
+    if(getToken(tokens[i])=="id") return rId(i+1)
+    if(getToken(tokens[i])=="num") return rNum(i+1)
+
+    throwsAnError("Elemento inválido após um parâmetro de operação");
+    tokens = deleteUnexpectedTokens(tokens, i, ["id","num"]);
+    return rOperation(i)
+  }
+
+
+  const rId = (i) => {
+    if(getToken(tokens[i])=="relação") return rRelation(i+1)
+    if(getToken(tokens[i])=="operador") return rOperation(i+1)
+    if(getToken(tokens[i])==")") return rTheEnd(i)
+
+    throwsAnError("Elemento inválido após um id dentro de uma expressão");
+    tokens = deleteUnexpectedTokens(tokens, i, ["operador","relação"]);
+    return rOperation(i)
+  }
+
+  const rNum = (i) => {
+    if(getToken(tokens[i])=="relação") return rRelation(i+1)
+    if(getToken(tokens[i])=="operador") return rOperation(i+1)
+    if(getToken(tokens[i])==")") return rTheEnd(i)
+
+    throwsAnError("Elemento inválido após um num dentro de uma expressão");
+    tokens = deleteUnexpectedTokens(tokens, i, ["operador","relação"]);
+    return rOperation(i)
+  }
+
+  const rRelation = (i) => {
+    if(getToken(tokens[i])=="id") return rId(i+1)
+    if(getToken(tokens[i])=="num") return rNum(i+1)
+
+    throwsAnError("Elemento inválido após um parâmetro de relação");
+    tokens = deleteUnexpectedTokens(tokens, i, ["id","num"]);
+    return rRelation(i)
+  }
+
+
+  const rStart = (i) => {
+    if(getToken(tokens[i])=="num") return rNum(i+1)
+    if(getToken(tokens[i])=="id") return rId(i+1)
+
+    throwsAnError("Elemento inválido após a abertura de parenteses");
+    tokens = deleteUnexpectedTokens(tokens, i, ["id","num"]);
+    return rStart(i)
+  }
+
+  const rTheEnd = (i) => {
+    return i
+  }
+
+
+  const newIndex = rStart(index+1)
+  return {
+    tokens,index:newIndex
+  }
+
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////// PROCESSO DE LEITURA DO IF ////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+const readIf = (tokens,index) => {
+
+  const { index:newIndex,tokens:newTokens } = validateExpression(tokens,index+1) // Já leu (expressao)
+
+  const secondToken = getToken(newTokens[newIndex+1])
+  if(secondToken!="then"){
+    throwsAnError("É necessário que haja um then após a expressão de um if");
+    tokens = deleteUnexpectedTokens(tokens, newIndex+1, ["then"]);
+  }
+
+  return nextToken(newTokens,newIndex+1)
+
 };
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 
-/////////////////////////////////////////////////////////////////////////////////////////
 
-const nextToken = (tokens, index) => {
-  ///
-  return;
+///////////////////////////////// PROCESSO DE LEITURA DO WHILE //////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+const readWhile = (tokens,index) => {
+
+  const { index:newIndex,tokens:newTokens } = validateExpression(tokens,index+1) // Já leu (expressao)
+
+  const secondToken = getToken(newTokens[newIndex+1])
+  if(secondToken!="do"){
+    throwsAnError("É necessário que haja um do após a expressão de um while");
+    tokens = deleteUnexpectedTokens(tokens, newIndex+1, ["do"]);
+  }
+
+  return nextToken(newTokens,newIndex+1)
+
 };
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////// PROCESSO DE LEITURA DO ELSE //////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+const readElse = (tokens,index) => {
+
+  foundOn = tokens.indexOf("<if,>")
+  
+  if(foundOn==-1) return throwsAnError("Um else inesperado foi recebido")
+
+  return nextToken(tokens,index+1)
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+////////////////////////////////// PROCESSO DE LEITURA DO :=  //////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 const afterAssignment = (tokens, index) => {
-  // :=
-
-  // num ou id
-  // em sequencia pode ter operador ou comparador ou ponto e virgula
-
-  return;
+  const { index:newIndex,tokens:newTokens } = validateExpression(tokens,index+1) // Já leu (expressao)
+  return nextToken(newTokens,newIndex+1) ;
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-AB->aC
-A->b
-C->k
+const validateExpressionAfterAssigment = (tokens,index) => {
 
-INT -> id,INT2 | id; | id EXPRESSAO
-INT2 -> id,INT2 | id;
-EXPRESSAO -> id | num | id OPERADOR | num OPERADOR
-OPERADOR -> id | num
-VAR -> id
-FLOAT -> id
-OPERADOR -> id | num
-RELACAO -> id | num
-PROGRAM -> id;
-IF -> (EXPRESSAO RELACAO EXPRESSAO) then
+  const rOperation = (i) => {
+    if(getToken(tokens[i])=="id") return rId(i+1)
+    if(getToken(tokens[i])=="num") return rNum(i+1)
+
+    throwsAnError("Elemento inválido após um parâmetro de operação");
+    tokens = deleteUnexpectedTokens(tokens, i, ["id","num"]);
+    return rOperation(i)
+  }
+
+  const rId = (i) => {
+    if(getToken(tokens[i])=="relação") return rRelation(i+1)
+    if(getToken(tokens[i])=="operador") return rOperation(i+1)
+    if(getToken(tokens[i])==";") return rTheEnd(i)
+
+    throwsAnError("Elemento inválido após um id dentro de uma expressão");
+    tokens = deleteUnexpectedTokens(tokens, i, ["operador","relação"]);
+    return rOperation(i)
+  }
+
+  const rNum = (i) => {
+    if(getToken(tokens[i])=="relação") return rRelation(i+1)
+    if(getToken(tokens[i])=="operador") return rOperation(i+1)
+    if(getToken(tokens[i])==";") return rTheEnd(i)
+
+    throwsAnError("Elemento inválido após um num dentro de uma expressão");
+    tokens = deleteUnexpectedTokens(tokens, i, ["operador","relação"]);
+    return rOperation(i)
+  }
+
+  const rRelation = (i) => {
+    if(getToken(tokens[i])=="id") return rId(i+1)
+    if(getToken(tokens[i])=="num") return rNum(i+1)
+
+    throwsAnError("Elemento inválido após um parâmetro de relação");
+    tokens = deleteUnexpectedTokens(tokens, i, ["id","num"]);
+    return rRelation(i)
+  }
 
 
-int id ; 
+  const rStart = (i) => {
+    if(getToken(tokens[i])=="num") return rNum(i+1)
+    if(getToken(tokens[i])=="id") return rId(i+1)
 
-*/
+    throwsAnError("Elemento inválido após a abertura de parenteses");
+    tokens = deleteUnexpectedTokens(tokens, i, ["id","num"]);
+    return rStart(i)
+  }
 
-// const proximoToken = (tokens,index) => {
+  const rTheEnd = (i) => {
+    return i
+  }
 
-//   switch(tokens[index]) {
-//     case 'int':
-//       trataInt(tokens,index)
-//       break;
-//     case 'var':
-//       trataVar(tokens,index)
-//       break;
-//     case ':=':
-//       //trataExpressao(tokens,index)
-//       break;
-//     case 'operador':
-//       //trataOperador(tokens,index)
-//       break;
-//     case 'relação':
-//       //trataRelacao(tokens,index)
-//       break;
-//     default:
-//       throw 'Token inválido: ' + tokens[index]
-//   }
-// }
 
-// const trataInt = (tokens,index) => {
+  const newIndex = rStart(index)
+  return {
+    tokens,index:newIndex
+  }
 
-//   // int id
-//   if( getToken(tokens[index])!="id"){
 
-//     // erro -> modo panico
-//     tokens = findToken(tokens,["id"],index)
+}
 
-//     //  int id;
-//     if ( getToken(tokens[index+1])==";" ){
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
-//       token = getToken(tokens[index+1])
-//       // Seleciona o proximo passo
-//     }
 
-//     // int id,
-//     if( getToken(tokens[index+1]) =="," ){
-//       trataInt(tokens,index+3)
-//     }
 
-//     // int id :=
-//     if (getToken(tokens[index+1])==":="){
-//       trataExpressao(tokens,index+2)
-//     }
+////////////////////////////////// PROCESSO DE LEITURA DO id  ///////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
-//     // ERRO -> panico
-//     tokens = findToken(tokens,[";",",",":="],index)
 
-//     // CHEGA AQUI
-//     // VIRGULA - > trataInt(tokens,index)
-//     if(tokens(index)==","){
-//       trataInt(tokens,index+1)
-//     }
+const afterId = (tokens,index) => {
+  return nextToken(tokens,index)
+}
 
-//     // PONTO E VIRGULA -> proximoToken(tokens,index)
-//     if(tokens(index)==";"){
-//       proximoToken(tokens,index+1)
-//     }
 
-//     // := -> trataExpressao(tokens,index)
-//     if(tokens(index)==":="){
-//       trataExpressao(tokens,index+1)
-//     }
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
-//   }
 
-//   //  int id;
-//   if ( getToken(tokens[index+1])==";" ){
 
-//       token = getToken(tokens[index+1])
-//       // Seleciona o proximo passo
-//   }
+/////////////////////////////////////// FUNÇÃO PRINCIPAL  ///////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
-//   // int id,
-//   if( getToken(tokens[index+1]) =="," ){
-//     trataInt(tokens,index+3)
-//   }
 
-//   // int id :=
-//   if (getToken(tokens[index+1])==":="){
-//     trataExpressao(tokens,index+2)
-//   }
+const nextToken = (tokens, index) => {
 
-//   // ERRO
+  return 
+  // let token = getToken(tokens[index])
+  // switch(token){
 
-// }
+  //   case "program":
+  //     return readProgram(tokens)
+  //   case "if":
+  //     return readIf(tokens,index)
+  //   case "else":
+  //     return readElse(tokens,index)
+  //   case 
 
-// const trataVar =  (tokens,index)=>{
 
-//   // var id
-//   if( getToken(tokens[index])!="id"){
+  // }
+};
 
-//     // erro -> modo panico
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
 
-//     // buscar o id
-//     isId= false
 
-//     while(isId==false && index<=tokens.length){
-//       if (getToken(index)=="id"){
-//         isId=true
-//       }else{
-//         tokens.splice(index)
-//       }
-//     }
 
-//     //  var id;
-//     if ( getToken(tokens[index+1])==";" ){
-
-//       token = getToken(tokens[index+1])
-//       // Seleciona o proximo passo
-//     }
-
-//     // var id,
-//     if( getToken(tokens[index+1]) =="," ){
-//       trataInt(tokens,index+3)
-//     }
-
-//     // var id :=
-//     if (getToken(tokens[index+1])==":="){
-
-//       // string
-//       if (getToken(tokens[index+1]=="string")){
-
-//         if(getToken(tokens[index+2])==";"){
-
-//         }
-
-//       }else{
-
-//         isString= false
-
-//         while(isString==false && index<=tokens.length){
-//           if (getToken(index)=="string"){
-//             isId=true
-//           }else{
-//             tokens.splice(index)
-//           }
-//         }
-
-//         if(getToken(tokens[index+2])==";"){
-
-//         }
-
-//       }
-
-//     }
-
-//   }
-
-//   //  var id;
-//   if ( getToken(tokens[index+1])==";" ){
-
-//     token = getToken(tokens[index+1])
-//         // Seleciona o proximo passo
-//   }
-
-//       // var id,
-//   if( getToken(tokens[index+1]) =="," ){
-//     trataInt(tokens,index+3)
-//   }
-
-//   // var id :=
-//   if (getToken(tokens[index+1])==":="){
-
-//     // string
-
-//   }
-
-// }
+module.exports = {
+  validateExpressionAfterAssigment,
+  deleteUnexpectedTokens,
+  validateExpression,
+  afterIntOrFloat,
+  throwsAnError,
+  readProgram,
+  readWhile,
+  readBegin,
+  readElse,
+  getToken,
+  afterVar,
+  readEnd,
+  readIf,
+};
