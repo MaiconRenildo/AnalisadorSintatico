@@ -1,9 +1,9 @@
 const { 
   deleteUnexpectedTokens,
   getToken,
-  afterIntOrFloat,
+  readIdAfterIntOrFloat,
   readProgram,
-  afterVar,
+  readIdAfterVar,
   readEnd,
   readBegin,
   validateExpression,
@@ -85,7 +85,7 @@ describe("util\n", () => {
   });
 
 
-  describe("afterIntOrFloat",() => {
+  describe("readIdAfterIntOrFloat",() => {
 
     afterEach(() => {
       jest.resetAllMocks();
@@ -102,7 +102,7 @@ describe("util\n", () => {
         "<;,>",
         "<end,>"
       ]
-      afterIntOrFloat(tokens,1)
+      readIdAfterIntOrFloat(tokens,1)
       expect(console.log).not.toHaveBeenCalled()
     })
 
@@ -120,7 +120,7 @@ describe("util\n", () => {
         "<;,>",
         "<end,>"
       ]
-      afterIntOrFloat(tokens,1)
+      readIdAfterIntOrFloat(tokens,1)
       expect(console.log).not.toHaveBeenCalled()
     })
 
@@ -137,7 +137,7 @@ describe("util\n", () => {
         "<end,>",
         "<end,>"
       ]
-      afterIntOrFloat(tokens,1)
+      readIdAfterIntOrFloat(tokens,1)
       expect(console.log.mock.calls[0][0]).toBe("Após um id deve haver um desses elementos -> (';',':=',','");
     })
 
@@ -149,7 +149,7 @@ describe("util\n", () => {
         "<int,>",
         "<id,1>",
       ]
-      afterIntOrFloat(tokens,1)
+      readIdAfterIntOrFloat(tokens,1)
       expect(console.log.mock.calls[0][0]).toBe("Fim inesperado após a leitura de um id");
     })
 
@@ -161,7 +161,7 @@ describe("util\n", () => {
       const tokens = [
         "<int,>",
       ]
-      afterIntOrFloat(tokens,1)
+      readIdAfterIntOrFloat(tokens,1)
       expect(console.log.mock.calls[0][0]).toBe("Fim inesperado após a leitura de um int/float");
     })
     
@@ -241,7 +241,7 @@ describe("util\n", () => {
   })
 
 
-  describe("afterVar",() => {
+  describe("readIdAfterVar",() => {
 
     afterEach(() => {
       jest.resetAllMocks();
@@ -260,7 +260,7 @@ describe("util\n", () => {
         "<;,>",
         "<end,>"
       ]
-      afterVar(tokens,1)
+      readIdAfterVar(tokens,1)
       expect(console.log).not.toHaveBeenCalled()
     })
 
@@ -278,7 +278,7 @@ describe("util\n", () => {
         "<;,>",
         "<end,>"
       ]
-      afterVar(tokens,1)
+      readIdAfterVar(tokens,1)
       expect(console.log).not.toHaveBeenCalled()
     })
 
@@ -296,7 +296,7 @@ describe("util\n", () => {
         "<;,>",
         "<end,>"
       ]
-      afterVar(tokens,1)
+      readIdAfterVar(tokens,1)
       expect(console.log.mock.calls[0][0]).toBe("A um var só é possível atribuir strings");
     })
 
@@ -313,7 +313,7 @@ describe("util\n", () => {
         "<;,>",
         "<end,>"
       ]
-      afterVar(tokens,1)
+      readIdAfterVar(tokens,1)
       expect(console.log.mock.calls[0][0]).toBe("É necessário o uso do ';' após a atribuição de um var");
     })
 
@@ -327,7 +327,7 @@ describe("util\n", () => {
         "<id,1>",
         "<:=,>",
       ]
-      afterVar(tokens,1)
+      readIdAfterVar(tokens,1)
       expect(console.log.mock.calls[0][0]).toBe("Fim inesperado após a leitura de um ':='");
     })
 
@@ -342,7 +342,7 @@ describe("util\n", () => {
         "<:=,>",
         "<string,'caramelo'>",
       ]
-      afterVar(tokens,1)
+      readIdAfterVar(tokens,1)
       expect(console.log.mock.calls[0][0]).toBe("Fim inesperado após a leitura de uma string");
     })
 

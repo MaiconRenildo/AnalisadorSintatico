@@ -1,13 +1,22 @@
 const lexicalAnalyzer = require("./lexicalAnalyzer/lexicalAnalyzer")
-const nextToken = require("./util/util")
+const util = require("./util/util")
 
 const Parser = async() =>{
 
   const { tokens,ids } = await lexicalAnalyzer()
-  console.log(tokens)
   console.log(ids)
+  tokens.forEach((t, index) => {
+    console.log(index,t)
+  })
+  
+  
+  try {
+    util.nextToken(tokens,0)    
 
-  // UTILIZAR A NEXT TOKEN
+  } catch (error) {
+    console.error(error)
+  }
+  
 }
 
 Parser()
